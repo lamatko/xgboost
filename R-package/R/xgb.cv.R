@@ -208,6 +208,7 @@ xgb.cv <- function(params=list(), data, nrounds, nfold, label = NULL, missing = 
     }
 
     if (prediction) {
+        models <- list()
         for (k in 1:nfold) {
             fd <- xgb_folds[[k]]
             if (!is.null(early.stop.round) && earlyStopflag) {
@@ -221,6 +222,7 @@ xgb.cv <- function(params=list(), data, nrounds, nfold, label = NULL, missing = 
             } else {
                 predictValues[fd$index] <- res[[2]]
             }
+            models[[paste0("model",k)]] <- fd$booster
         }
     }
 
@@ -239,7 +241,7 @@ xgb.cv <- function(params=list(), data, nrounds, nfold, label = NULL, missing = 
     for(line in split) dt <- line[2:length(line)] %>% str_extract_all(pattern = "\\d*\\.+\\d*") %>% unlist %>% as.numeric %>% as.list %>% {rbindlist( list( dt, .), use.names = F, fill = F)}
 
     if (prediction) {
-        return( list( dt = dt,pred = predictValues))
+        return( list( dt = d, models = models, pred = predictValues))
     }
     return(dt)
 }
